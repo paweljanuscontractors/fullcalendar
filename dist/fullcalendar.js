@@ -3701,25 +3701,32 @@ var Grid = FC.Grid = Class.extend(ListenerMixin, MouseIgnorerMixin, {
 				_this.unrenderSelection();
 				enableCursor();
 			},
-			interactionEnd: function(ev, isCancelled) {
-				if (!isCancelled) {
-					if (
-						dayClickHit &&
-						!_this.isIgnoringMouse // see hack in dayTouchStart
-					) {
-						view.triggerDayClick(
-							_this.getHitSpan(dayClickHit),
-							_this.getHitEl(dayClickHit),
-							ev
-						);
-					}
-					if (selectionSpan) {
-						// the selection will already have been rendered. just report it
-						view.reportSelection(selectionSpan, ev);
-					}
-					enableCursor();
-				}
-			}
+            interactionEnd: function(ev, isCancelled) {
+                var preventClick = false;
+                if (this.isTouch) {
+                    var touch = ev.originalEvent.changedTouches[0];
+                    preventClick = dragListener.originX !== touch.pageX ||
+                        dragListener.originY !== touch.pageY;
+                }
+                if (!isCancelled) {
+                    if (
+                        dayClickHit &&
+                        !preventClick &&
+                        !_this.isIgnoringMouse // see hack in dayTouchStart
+                    ) {
+                        view.triggerDayClick(
+                            _this.getHitSpan(dayClickHit),
+                            _this.getHitEl(dayClickHit),
+                            ev
+                        );
+                    }
+                    if (selectionSpan) {
+                        // the selection will already have been rendered. just report it
+                        view.reportSelection(selectionSpan, ev);
+                    }
+                    enableCursor();
+                }
+            }
 		});
 
 		return dragListener;
